@@ -6,7 +6,7 @@ import (
 )
 
 func init() {
-	rand.NewSource(time.Now().UnixMicro())
+	rand.Seed(time.Now().UnixMicro())
 }
 
 type Processor interface {
