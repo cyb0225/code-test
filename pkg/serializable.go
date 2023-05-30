@@ -17,7 +17,7 @@ func (s *SerializableProcess) Process(updateId int, selectIds ...int) {
 	defer s.t.UnLockTable()
 
 	sum := 0
-	for v := range selectIds {
+	for _, v := range selectIds {
 		sum += s.t.Select(v)
 	}
 	s.t.Update(updateId, sum)
