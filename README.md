@@ -31,7 +31,7 @@ MonographData 公司笔试题
 
 ## 锁的粒度
 
-如果直接对在整个 S 加锁，类似串行化的隔离级别，那么处理起来会很方便，但是执行起来效率会很低，具体可以查看 [串行化](./serializable) 下的代码和实验结果。
+如果直接对在整个 S 加锁，类似串行化的隔离级别，那么处理起来会很方便，但是执行起来效率会很低，具体可以查看 [串行化](pkg/serializable.go) 下的代码和实验结果。
 
 设计行锁，由于题目提供的并发执行的 worker 数量及每次操作的纪录数是远小于总数据量的，所以很少会造成记录上的冲突，所以可以使用行锁来提升性能。
 
@@ -108,3 +108,77 @@ worker 随机出来的 j 与 i、i + 1、i + 2 可能是相同的，那么如果
 
 go 语言的 goroutine 是在用户代码层调用的，使用正常的互斥锁无法达到用户代码层面的调度。所以 go sync 里面的锁也都是使用 atomic 原子操作实现的（即
 cpu 提供的并发原语）。所以，可以使用 atomic 来减少锁调用的开销。
+
+
+## 实验数据
+
+> 实验环境:
+> ubuntu20.04（本机）  16GB 内存  16核 CPU
+
+### serializable 加表锁
+
+```shell
+cyb@cyb-ThinkBook:~/project/codetest$ go build -o main .
+cyb@cyb-ThinkBook:~/project/codetest$ ./main -mode table
+time usage: 25.00223121s
+```
+
+### record_lock 加记录锁
+
+可以看到会遇到死锁的情况，但是相对所有操作来说不多，时间上性能比加表锁快上不少。
+
+```shell
+cyb@cyb-ThinkBook:~/project/codetest$ go build -o main .
+cyb@cyb-ThinkBook:~/project/codetest$ ./main -mode record
+dead lock
+retry
+dead lock
+retry
+dead lock
+retry
+dead lock
+retry
+dead lock
+retry
+dead lock
+retry
+dead lock
+retry
+dead lock
+retry
+dead lock
+retry
+dead lock
+retry
+dead lock
+retry
+dead lock
+retry
+dead lock
+retry
+dead lock
+retry
+dead lock
+retry
+dead lock
+retry
+dead lock
+retry
+dead lock
+retry
+dead lock
+retry
+dead lock
+retry
+dead lock
+retry
+dead lock
+retry
+dead lock
+retry
+dead lock
+retry
+dead lock
+retry
+time usage: 203.387967ms
+```

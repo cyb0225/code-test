@@ -1,3 +1,3 @@
-module codetest
+module github.com/cyb0225/code-test
 
-go 1.18
+go 1.20
