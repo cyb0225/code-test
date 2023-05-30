@@ -1,11 +1,24 @@
 package pkg
 
-import "math/rand"
+var _ Processor = (*SerializableProcess)(nil)
 
-func (t *Table) ProcessInSerializableMode() {
-	j := rand.Intn(t.Count())
-	i := rand.Intn(t.Count())
-	t.LockTable()
-	defer t.UnLockTable()
-	t.Update(j, t.Select(i%t.Count())+t.Select((i+1)%t.Count())+t.Select((i+2)%t.Count()))
+type SerializableProcess struct {
+	t *Table
+}
+
+func NewSerializableProcess(t *Table) *SerializableProcess {
+	return &SerializableProcess{
+		t: t,
+	}
+}
+
+func (s *SerializableProcess) Process(updateId int, selectIds ...int) {
+	s.t.LockTable()
+	defer s.t.UnLockTable()
+
+	sum := 0
+	for v := range selectIds {
+		sum += s.t.Select(v)
+	}
+	s.t.Update(updateId, sum)
 }

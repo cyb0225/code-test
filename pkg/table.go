@@ -5,6 +5,11 @@ import (
 	"time"
 )
 
+const (
+	updateTime = time.Microsecond * 3 // 模拟更新操作的延时
+	selectTime = time.Microsecond     // 模拟查询操作的延时
+)
+
 type Table struct {
 	L sync.Mutex
 	S []record

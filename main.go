@@ -27,19 +27,26 @@ func init() {
 }
 
 func main() {
-	if mode != "record" && mode != "table" {
-		fmt.Println("未知的隔离模式:", mode)
+	t := pkg.NewTable()
+
+	var process pkg.Processor
+	switch mode {
+	case recordMode:
+		process = pkg.NewRecordLockProcessor(t)
+	case tableMode:
+		process = pkg.NewSerializableProcess(t)
+	default:
+		fmt.Println("")
 		return
 	}
 
-	t := pkg.NewTable()
+	// 插入mock数据
 	for i := 0; i < records; i++ {
 		t.Insert(1)
 	}
 
 	rand.NewSource(time.Now().UnixMicro())
 
-	// start set database
 	start := time.Now()
 	var wg sync.WaitGroup
 	wg.Add(syncWorkers)
@@ -47,12 +54,8 @@ func main() {
 		go func() {
 			defer wg.Done()
 			for j := 0; j < works; j++ {
-				switch mode {
-				case recordMode:
-					t.ProcessInRecordLockMode()
-				case tableMode:
-					t.ProcessInSerializableMode()
-				}
+				updateId, selectIds := pkg.GetRandomIds(t.Count(), 3)
+				process.Process(updateId, selectIds...)
 			}
 		}()
 	}
