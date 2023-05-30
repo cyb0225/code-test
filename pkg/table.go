@@ -30,6 +30,8 @@ func (t *Table) Count() int {
 	return len(t.S)
 }
 
+// TODO: 各个字段操作时，应该检查 id 是否存在，如果不存在，应该返回一个错误
+
 // Insert 插入记录
 func (t *Table) Insert(data int) {
 	t.L.Lock()
